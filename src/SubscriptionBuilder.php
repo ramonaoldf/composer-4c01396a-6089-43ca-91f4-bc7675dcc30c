@@ -4,6 +4,7 @@ namespace Laravel\Cashier;
 
 use Exception;
 use Carbon\Carbon;
+use Braintree\Customer;
 use Braintree\Subscription as BraintreeSubscription;
 
 class SubscriptionBuilder
@@ -108,6 +109,7 @@ class SubscriptionBuilder
      *
      * @param  array  $options
      * @return \Laravel\Cashier\Subscription
+     * @throws \Exception
      */
     public function add(array $options = [])
     {
@@ -123,9 +125,7 @@ class SubscriptionBuilder
      * @return \Laravel\Cashier\Subscription
      * @throws \Exception
      */
-    public function create($token = null,
-                           array $customerOptions = [],
-                           array $subscriptionOptions = [])
+    public function create($token = null, array $customerOptions = [], array $subscriptionOptions = []): Subscription
     {
         $payload = $this->getSubscriptionPayload(
             $this->getBraintreeCustomer($token, $customerOptions), $subscriptionOptions
@@ -163,6 +163,7 @@ class SubscriptionBuilder
      * @param  \Braintree\Customer  $customer
      * @param  array  $options
      * @return array
+     * @throws \Exception
      */
     protected function getSubscriptionPayload($customer, array $options = [])
     {
@@ -176,7 +177,7 @@ class SubscriptionBuilder
 
         return array_merge([
             'planId' => $this->plan,
-            'price' => (string) round($plan->price * (1 + ($this->owner->taxPercentage() / 100)), 2),
+            'price' => number_format($plan->price * (1 + ($this->owner->taxPercentage() / 100)), 2, '.', ''),
             'paymentMethodToken' => $this->owner->paymentMethod()->token,
             'trialPeriod' => $this->trialDays && ! $this->skipTrial ? true : false,
             'trialDurationUnit' => 'day',
@@ -210,7 +211,7 @@ class SubscriptionBuilder
      * @param  array  $options
      * @return \Braintree\Customer
      */
-    protected function getBraintreeCustomer($token = null, array $options = [])
+    protected function getBraintreeCustomer($token = null, array $options = []): Customer
     {
         if (! $this->owner->braintree_id) {
             $customer = $this->owner->createAsBraintreeCustomer($token, $options);

@@ -16,12 +16,14 @@ You will need to set the following details locally and on your Braintree account
 
 ### Local
 
-#### .env
+#### Environment Variables
 
     BRAINTREE_MERCHANT_ID=
     BRAINTREE_PUBLIC_KEY=
     BRAINTREE_PRIVATE_KEY=
-    BRAINTREE_MODEL=User
+    BRAINTREE_MODEL=Laravel\Cashier\Tests\User
+    
+You can set these variables in the `phpunit.xml.dist` file.
 
 ### Braintree
 
@@ -38,8 +40,8 @@ You will need to set the following details locally and on your Braintree account
 
 ## Official Documentation
 
-Documentation for Cashier can be found on the [Laravel website](http://laravel.com/docs/billing).
+Documentation for Cashier can be found on the [Laravel website](https://laravel.com/docs/billing).
 
 ## License
 
-Laravel Cashier is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+Laravel Cashier is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
