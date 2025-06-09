@@ -22,7 +22,8 @@ trait Billable
      *
      * @param  int  $amount
      * @param  array  $options
-     * @return \Braintree\Transaction
+     * @return array
+     * @throws \Exception
      */
     public function charge($amount, array $options = [])
     {
@@ -30,7 +31,7 @@ trait Billable
 
         $response = BraintreeTransaction::sale(array_merge([
             'amount' => (string) round($amount * (1 + ($this->taxPercentage() / 100)), 2),
-            'paymentMethodToken' => $customer->paymentMethods[0]->token,
+            'paymentMethodToken' => $this->paymentMethod()->token,
             'options' => [
                 'submitForSettlement' => true,
             ],
@@ -50,7 +51,7 @@ trait Billable
      * @param  string  $description
      * @param  int  $amount
      * @param  array  $options
-     * @return \Braintree\Transaction
+     * @return array
      */
     public function tab($description, $amount, array $options = [])
     {
@@ -67,7 +68,7 @@ trait Billable
      * @param  string  $description
      * @param  int  $amount
      * @param  array  $options
-     * @return \Braintree\Transaction
+     * @return array
      */
     public function invoiceFor($description, $amount, array $options = [])
     {
@@ -201,16 +202,16 @@ trait Billable
 
         if (is_null($invoice)) {
             throw new NotFoundHttpException;
-        } else {
-            return $invoice;
         }
+
+        return $invoice;
     }
 
     /**
      * Create an invoice download Response.
      *
      * @param  string  $id
-     * @param  array   $data
+     * @param  array  $data
      * @param  string  $storagePath
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -273,6 +274,7 @@ trait Billable
      * @param  string  $token
      * @param  array  $options
      * @return void
+     * @throws \Exception
      */
     public function updateCard($token, array $options = [])
     {
@@ -327,9 +329,10 @@ trait Billable
      * Apply a coupon to the billable entity.
      *
      * @param  string  $coupon
-     * @param  string $subscription
+     * @param  string  $subscription
      * @param  bool  $removeOthers
      * @return void
+     * @throws \InvalidArgumentException
      */
     public function applyCoupon($coupon, $subscription = 'default', $removeOthers = false)
     {
@@ -340,6 +343,22 @@ trait Billable
         }
 
         $subscription->applyCoupon($coupon, $removeOthers);
+    }
+
+    /**
+     * Get the default payment method for the customer.
+     *
+     * @return array
+     */
+    public function paymentMethod()
+    {
+        $customer = $this->asBraintreeCustomer();
+
+        foreach ($customer->paymentMethods as $paymentMethod) {
+            if ($paymentMethod->isDefault()) {
+                return $paymentMethod;
+            }
+        }
     }
 
     /**
@@ -385,6 +404,7 @@ trait Billable
      * @param  string  $token
      * @param  array  $options
      * @return \Braintree\Customer
+     * @throws \Exception
      */
     public function createAsBraintreeCustomer($token, array $options = [])
     {
@@ -406,7 +426,7 @@ trait Billable
             throw new Exception('Unable to create Braintree customer: '.$response->message);
         }
 
-        $paymentMethod = $response->customer->paymentMethods[0];
+        $paymentMethod = $this->paymentMethod();
 
         $paypalAccount = $paymentMethod instanceof PayPalAccount;
 

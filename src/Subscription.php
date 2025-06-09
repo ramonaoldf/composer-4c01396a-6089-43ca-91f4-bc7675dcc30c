@@ -94,9 +94,9 @@ class Subscription extends Model
     {
         if (! is_null($this->trial_ends_at)) {
             return Carbon::today()->lt($this->trial_ends_at);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -108,16 +108,17 @@ class Subscription extends Model
     {
         if (! is_null($endsAt = $this->ends_at)) {
             return Carbon::now()->lt(Carbon::instance($endsAt));
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
      * Swap the subscription to a new Braintree plan.
      *
      * @param  string  $plan
-     * @return $this
+     * @return $this|\Laravel\Cashier\Subscription
+     * @throws \Exception
      */
     public function swap($plan)
     {
@@ -152,7 +153,6 @@ class Subscription extends Model
             $this->fill([
                 'braintree_plan' => $plan->id,
                 'ends_at' => null,
-                'trial_ends_at' => null,
             ])->save();
         } else {
             throw new Exception('Braintree failed to swap plans: '.$response->message);
@@ -208,8 +208,8 @@ class Subscription extends Model
     /**
      * Determine if the user is switching form yearly to monthly billing.
      *
-     * @param  BraintreePlan  $currentPlan
-     * @param  BraintreePlan  $plan
+     * @param  \Braintree\Plan  $currentPlan
+     * @param  \Braintree\Plan  $plan
      * @return bool
      */
     protected function switchingToMonthlyPlan($currentPlan, $plan)
@@ -220,8 +220,8 @@ class Subscription extends Model
     /**
      * Get the discount to apply when switching to a monthly plan.
      *
-     * @param  BraintreePlan  $currentPlan
-     * @param  BraintreePlan  $plan
+     * @param  \Braintree\Plan  $currentPlan
+     * @param  \Braintree\Plan  $plan
      * @return object
      */
     protected function getDiscountForSwitchToMonthly($currentPlan, $plan)
@@ -237,7 +237,7 @@ class Subscription extends Model
     /**
      * Calculate the amount of discount to apply to a swap to monthly billing.
      *
-     * @param  BraintreePlan  $plan
+     * @param  \Braintree\Plan  $plan
      * @return float
      */
     protected function moneyRemainingOnYearlyPlan($plan)
