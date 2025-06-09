@@ -51,7 +51,7 @@ class WebhookController extends Controller
      * @param  \Braintree\WebhookNotification  $webhook
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function handleSubscriptionCanceled($webhook): Response
+    protected function handleSubscriptionCanceled($webhook)
     {
         return $this->cancelSubscription($webhook->subscription->id);
     }
@@ -62,7 +62,7 @@ class WebhookController extends Controller
      * @param  \Braintree\WebhookNotification  $webhook
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function handleSubscriptionExpired($webhook): Response
+    protected function handleSubscriptionExpired($webhook)
     {
         return $this->cancelSubscription($webhook->subscription->id);
     }
@@ -73,7 +73,7 @@ class WebhookController extends Controller
      * @param  string  $subscriptionId
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function cancelSubscription($subscriptionId): Response
+    protected function cancelSubscription($subscriptionId)
     {
         $subscription = $this->getSubscriptionById($subscriptionId);
 
@@ -88,9 +88,9 @@ class WebhookController extends Controller
      * Get the model for the given subscription ID.
      *
      * @param  string  $subscriptionId
-     * @return \Laravel\Cashier\Subscription
+     * @return \Laravel\Cashier\Subscription|null
      */
-    protected function getSubscriptionById($subscriptionId): Subscription
+    protected function getSubscriptionById($subscriptionId): ?Subscription
     {
         return Subscription::where('braintree_id', $subscriptionId)->first();
     }
@@ -101,7 +101,7 @@ class WebhookController extends Controller
      * @param  array  $parameters
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function missingMethod(array $parameters = []): Response
+    public function missingMethod(array $parameters = [])
     {
         return new Response;
     }
