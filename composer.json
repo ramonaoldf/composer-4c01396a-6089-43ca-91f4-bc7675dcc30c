@@ -20,7 +20,7 @@
         "presttec\/dompdf": "^0.8.0",
         "presttec\/illuminate-database": "~5.7.0|~5.8.0",
         "presttec\/illuminate-support": "~5.7.0|~5.8.0",
-        "presttec\/carbon": "~1.0",
+        "presttec\/carbon": "^1.26.3 || ^2.0",
         "presttec\/http-kernel": "~4.0"
     },
     "require-dev": {
